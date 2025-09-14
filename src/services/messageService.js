@@ -2,9 +2,9 @@ const { model } = require('mongoose');
 
 const Message = model('messages');
 
-exports.create = (createMessageDto) => {
-    const message = new Message(createMessageDto);
-    return message.save();
+exports.create = async (data) => {
+    const message = new Message(data);
+    return await (await message.save()).populate('sender');
 }
 
 exports.read = async (data) => {
@@ -61,4 +61,8 @@ exports.emoticon = async (id, createEmoticonDto) => {
         emoticons: updatedEmoticons,
     });
     return this.readOne(id);
+}
+
+exports.readByChannelID = async (channelID) => {
+    return await Message.find({ channelID }).populate("sender");
 }

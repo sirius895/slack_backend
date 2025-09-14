@@ -25,6 +25,6 @@ exports.delete = async (_id) => {
     return Channel.findByIdAndDelete(_id);
 }
 
-exports.readByChannelID = async (userId) => {
+exports.readByUserID = async (userId) => {
     return await Channel.find({ members: { $in: [userId] } });
 }

@@ -5,6 +5,8 @@ const { STATUS, TYPES, METHODS } = require('../constants/chat');
 exports.create = async (socket, data) => {
     try {
         const channel = await channelService.create(data);
+        console.log(channel);
+
         multiEmit(socket.socketList, channel.members, `${TYPES.CHANNEL}_${METHODS.CREATE}`, true, channel);
     } catch (err) {
         socket.emit(`${TYPES.CHANNEL}_${METHODS.CREATE}`, false, { message: "Create Failed" });
@@ -16,7 +18,7 @@ exports.read = async (socket, data) => {
         const channels = await channelService.read(socket.user.id);
         socket.emit(`${TYPES.CHANNEL}_${METHODS.READ}`, true, channels);
     } catch (err) {
-        socket.emit(`${TYPES.CHANNEL}_${METHODS.READ}`, false, { message: "Create Failed" });
+        socket.emit(`${TYPES.CHANNEL}_${METHODS.READ}`, false, { message: "Read Failed" });
     }
 }
 
@@ -47,7 +49,7 @@ exports.delete = async (socket, data) => {
 
 exports.readByUserID = async (socket, data) => {
     try {
-        const channels = await channelService.readByChannelID(data);
+        const channels = await channelService.readByUserID(data);
         socket.emit(`${TYPES.CHANNEL}_${METHODS.READ_BY_USER_ID}`, true, channels);
     } catch (err) {
         socket.emit(`${TYPES.CHANNEL}_${METHODS.READ_BY_USER_ID}`, false, { ...data, message: err.message });

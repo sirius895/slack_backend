@@ -5,16 +5,17 @@ const { STATUS, TYPES, METHODS } = require('../constants/chat');
 
 exports.create = async (socket, data) => {
     try {
-        const message = await messageService.create({ sender: socket.user.id, ...data });
-        const channel = await channelService.readOne(message.channel);
-        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.CREATE}`, STATUS.ON, message);
-        if (data.parent) {
-            multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.UPDATE}`, STATUS.ON, await messageService.readOne(data.parent));
-        }
-        socket.emit(`${TYPES.MESSAGE}_${METHODS.CREATE}`, STATUS.SUCCESS, data);
+        const message = await messageService.create(data);
+        const channel = await channelService.read(message.channelID);
+        console.log(channel);
+        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.CREATE}`, true, message);
+        // if (data.parent) {
+        //     multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.UPDATE}`, STATUS.ON, await messageService.readOne(data.parent));
+        // }
+        // socket.emit(`${TYPES.MESSAGE}_${METHODS.CREATE}`, STATUS.SUCCESS, data);
     } catch (err) {
         console.error(err);
-        socket.emit(`${TYPES.MESSAGE}_${METHODS.CREATE}`, STATUS.FAILED, { ...data, message: err.message });
+        socket.emit(`${TYPES.MESSAGE}_${METHODS.CREATE}`, false, { message: err.message });
     }
 }
 
@@ -40,12 +41,11 @@ exports.update = async (socket, data) => {
 
 exports.delete = async (socket, data) => {
     try {
-        const message = await messageService.delete(socket.user.id, data.id);
-        const channel = await channelService.readOne(message.channel);
-        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.DELETE}`, STATUS.ON, data);
-        socket.emit(`${TYPES.MESSAGE}_${METHODS.DELETE}`, STATUS.SUCCESS, data);
+        const message = await messageService.delete(socket.user._id, data);
+        const channel = await channelService.read(message.channelID);
+        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.DELETE}`, true, data);
     } catch (err) {
-        socket.emit(`${TYPES.MESSAGE}_${METHODS.DELETE}`, STATUS.FAILED, { ...data, message: err.message });
+        socket.emit(`${TYPES.MESSAGE}_${METHODS.DELETE}`, false, { message: err.message });
     }
 }
 
@@ -67,5 +67,18 @@ exports.typing = async (socket, data) => {
         socket.emit(TYPES.TYPING, STATUS.SUCCESS, data);
     } catch (err) {
         socket.emit(TYPES.TYPING, STATUS.FAILED, { ...data, message: err.message });
+    }
+}
+
+exports.readByChannelID = async (socket, data) => {
+    try {
+        console.log(data, "================");
+
+        const messages = await messageService.readByChannelID(data);
+        console.log(messages);
+
+        socket.emit(`${TYPES.MESSAGE}_${METHODS.READ_BY_CHANNEL_ID}`, true, messages);
+    } catch (error) {
+        socket.emit(`${TYPES.MESSAGE}_${METHODS.READ_BY_CHANNEL_ID}`, false, { message: err.message });
     }
 }

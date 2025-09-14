@@ -2,8 +2,8 @@ const { model } = require('mongoose');
 
 const User = model('users');
 
-exports.create = (createUserDto) => {
-    const user = new User(createUserDto);
+exports.create = (data) => {
+    const user = new User(data);
     return user.save();
 }
 
