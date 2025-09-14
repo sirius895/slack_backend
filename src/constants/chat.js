@@ -4,7 +4,7 @@ exports.STATUS = {
     FAILED: 'FAILED',
 }
 
-exports.REQUEST = {
+exports.TYPES = {
     AUTH: 'AUTH',
     CHANNEL: 'CHANNEL',
     MESSAGE: 'MESSAGE',
@@ -12,9 +12,12 @@ exports.REQUEST = {
     TYPING: 'TYPING',
 }
 
-exports.METHOD = {
+exports.METHODS = {
     CREATE: 'CREATE',
     READ: 'READ',
     UPDATE: 'UPDATE',
     DELETE: 'DELETE',
+    READ_BY_CHANNEL_ID: "READ_BY_CHANNEL_ID",
+    READ_BY_PARENT_ID: "READ_BY_PARENT_ID",
+    READ_BY_USER_ID: "READ_BY_USER_ID",
 }

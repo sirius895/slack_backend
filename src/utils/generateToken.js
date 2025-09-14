@@ -4,7 +4,7 @@ require('dotenv').config()
 const generateToken = (user) => {
     const Token = jwt.sign(
         {
-            id: user._id,
+            _id: user._id,
             email: user.email,
             username: user.username,
         },

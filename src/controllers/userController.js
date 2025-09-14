@@ -1,3 +1,4 @@
+const { default: resState } = require('../constants/resState');
 const userService = require('../services/userService');
 
 exports.create = async (req, res) => {
@@ -13,10 +14,17 @@ exports.create = async (req, res) => {
 exports.read = async (req, res) => {
     try {
         const result = await userService.read();
-        res.json(result);
+        res.json({
+            status: resState.SUCCESS,
+            message: "Read Users Success",
+            payload: result
+        });
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: err.message });
+        res.status(500).json({
+            status: resState.ERROR,
+            message: "Server Error",
+            payload: []
+        });
     }
 }
 
