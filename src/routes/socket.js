@@ -1,5 +1,6 @@
 const { TYPES, METHODS, STATUS } = require('../constants/chat');
 const authService = require('../services/authService');
+const authCtr = require("../controllers/authController")
 const channelCtr = require('../controllers/channelController');
 const messageCtr = require('../controllers/messageController');
 
@@ -31,8 +32,9 @@ const removeAuth = (socket) => {
     }
 }
 
-const onConnect = (socket) => {
+const onConnect = (socket, io) => {
     try {
+
         console.log(`Socket ${socket.id} is connected`);
         socket.socketList = socketList;
         socket.on(TYPES.AUTH, (token) => {
@@ -49,6 +51,7 @@ const onConnect = (socket) => {
             }
         });
         socket.on(`disconnect`, () => removeAuth(socket));
+        socket.on(`${TYPES.AUTH}_${METHODS.UPDATE}`, (data) => authMdr(socket, data, authCtr.changeState));
 
         socket.on(`${TYPES.CHANNEL}_${METHODS.CREATE}`, (data) => authMdr(socket, data, channelCtr.create));
         socket.on(`${TYPES.CHANNEL}_${METHODS.READ}`, (data) => authMdr(socket, data, channelCtr.read));

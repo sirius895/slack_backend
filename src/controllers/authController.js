@@ -1,10 +1,12 @@
 const User = require("../models/user");
-require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const generateToken = require('../utils/generateToken');
 const { default: resState } = require("../constants/resState");
 const { tokenVerify } = require("../services/authService");
+const { TYPES, METHODS } = require('../constants/chat');
+require("dotenv").config();
+
 
 //signUp
 exports.signUp = async (req, res) => {
@@ -58,6 +60,7 @@ exports.signIn = async (req, res) => {
             message: "Password is not correct!",
             payload: "",
         })
+        await User.updateOne({ email }, { state: 3 })
         const token = generateToken(user);
         return res.json({
             status: resState.SUCCESS,
@@ -65,6 +68,8 @@ exports.signIn = async (req, res) => {
             payload: token
         })
     } catch (error) {
+        console.log(error);
+
         return res.status(500).json({
             status: resState.ERROR,
             message: "Server Error",
@@ -73,7 +78,7 @@ exports.signIn = async (req, res) => {
     }
 };
 
-exports.getUserByToken = (req, res) => {
+exports.getUserByToken = async (req, res) => {
     try {
         const token = req.headers.authorization
         const user = tokenVerify(token);
@@ -84,10 +89,11 @@ exports.getUserByToken = (req, res) => {
                 payload: {}
             })
         }
+        const userInfo = await User.findById(user._id)
         return res.status(200).json({
             status: resState.SUCCESS,
             message: "Authorized",
-            payload: user
+            payload: userInfo
         })
     } catch (error) {
         return res.status(500).json(500)({
@@ -95,6 +101,22 @@ exports.getUserByToken = (req, res) => {
             message: "Server Error",
             payload: {}
         })
+    }
+}
+
+exports.changeState = async (socket, data) => {
+    try {
+        await User.findByIdAndUpdate(socket.user._id, data);
+        const user = await User.findById(socket.user._id)
+        console.log(user);
+
+        socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, true, user)
+        // socket.emit(`broadcast`, true, user)
+        // multiEmit(socket.socketList, (await User.find({})).map(m => m._id), true, user)
+    } catch (error) {
+        console.log(error);
+
+        socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, false, { message: error.message })
     }
 }
 

@@ -32,9 +32,10 @@ const io = socketIO(server, {
   },
 });
 
+
 const { onConnect: onSocketConnect } = require("./src/routes/socket");
 
-io.on("connection", onSocketConnect);
+io.on("connection", (socket) => onSocketConnect(socket, io));
 
 const port = process.env.PORT;
 
