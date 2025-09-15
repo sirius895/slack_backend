@@ -11,23 +11,23 @@ const authMdr = (socket, data, next) => {
         const token = socket.handshake.headers.token;
         const user = authService.tokenVerify(token);
         socket.user = user;
-        if (!token)
-            throw new Error('Unauthorized');
+
+        if (!token) throw new Error('Unauthorized');
         next(socket, data);
     } catch (err) {
-        socket.emit(TYPES.AUTH, STATUS.FAILED, err.message);
+        socket.emit(TYPES.AUTH, false, err.message);
     }
 }
 
 const removeAuth = (socket) => {
     try {
-        console.log("disconnect", socket.id);
-
-        socketList = socketList.filter(s => s.id !== socket.id)
+        console.log("disconnect");
+        if (!socketList[socket?.user?._id]) return;
+        socketList[socket.user._id] = socketList[socket.user._id].filter(s => s.id !== socket.id)
         socket.socketList = socketList
         userList = userList.filter(u => u !== socket.user._id)
     } catch (error) {
-
+        console.log("removeErr", error);
     }
 }
 
@@ -38,11 +38,14 @@ const onConnect = (socket) => {
         socket.on(TYPES.AUTH, (token) => {
             console.log(`User login with token ${token}`);
             const user = authService.tokenVerify(token);
+
             if (user) {
                 if (!socketList[user._id]) socketList[user._id] = [];
-                if (!socketList[user._id].find(s => s.id === socket.id)) socketList[user._id].push(socket);
-                if (!userList.find(u => u === user._id)) userList.push(user._id)
+                if (!socketList[user._id].find(s => String(s.id) === String(socket.id))) socketList[user._id].push(socket);
+                if (!userList.find(u => String(u) === String(user._id))) userList.push(user._id)
                 socket.socketList = socketList
+            } else {
+                throw new Error("Unauthorized");
             }
         });
         socket.on(`disconnect`, () => removeAuth(socket));
@@ -62,7 +65,7 @@ const onConnect = (socket) => {
         // socket.on(TYPES.EMOTICON, (data) => authMdr(socket, data, messageCtr.emoticon));
         socket.on(TYPES.TYPING, (data) => authMdr(socket, data, messageCtr.typing));
     } catch (error) {
-
+        console.log("auth error", error.message);
     }
 }
 

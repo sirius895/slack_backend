@@ -29,8 +29,6 @@ exports.update = async (socket, data) => {
     try {
         const { _id, ..._data } = data
         const message = await messageService.update(socket.user._id, _id, _data);
-        console.log(message);
-
         const channel = await channelService.read(message.channelID);
         multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.UPDATE}`, true, message);
     } catch (err) {

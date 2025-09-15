@@ -21,7 +21,7 @@ exports.read = async (data) => {
 }
 
 exports.readOne = async (_id) => {
-    const message = await Message.findById(_id);
+    const message = await Message.findById(_id).populate("sender");
     if (!message)
         throw new Error('Not found message');
     const childCount = await Message.find({ parentID: _id }).count();
@@ -33,8 +33,6 @@ exports.update = async (userId, _id, data) => {
     const message = await Message.findById(_id);
     if (!message)
         throw new Error('Not found message');
-    if (message.sender != userId)
-        throw new Error('User has no permission to update this message');
     await Message.findByIdAndUpdate(_id, data);
     return await Message.findById(_id).populate("sender");
 }
@@ -49,6 +47,8 @@ exports.delete = async (userId, id) => {
 }
 
 exports.handleEmos = async (_id, data) => {
+    console.log(_id, data);
+
     const message = await Message.findById(_id);
     const emoticons = message.emoticons;
     let updatedEmos = [];
@@ -65,6 +65,12 @@ exports.handleEmos = async (_id, data) => {
 
 exports.readByChannelID = async (channelID) => {
     return await Message.find({ channelID }).populate("sender");
+    // const children = await Message.find().in('parentID', messages.map(message => message._id));
+    // return messages.map((message) => {
+    //     const childCount = children.filter(child => String(child.parentID) === String(message._id)).length;
+    //     message.childCount = childCount;
+    //     return message;
+    // });
 }
 
 
