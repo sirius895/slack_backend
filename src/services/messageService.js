@@ -20,11 +20,11 @@ exports.read = async (data) => {
     return messages;
 }
 
-exports.readOne = async (id) => {
-    const message = await Message.findById(id);
+exports.readOne = async (_id) => {
+    const message = await Message.findById(_id);
     if (!message)
         throw new Error('Not found message');
-    const childCount = await Message.find({ parent: id }).count();
+    const childCount = await Message.find({ parentID: _id }).count();
     message.childCount = childCount;
     return message;
 }
@@ -48,19 +48,23 @@ exports.delete = async (userId, id) => {
     return Message.findByIdAndDelete(id);
 }
 
-exports.emoticon = async (id, createEmoticonDto) => {
-    const message = await Message.findById(id);
+exports.handleEmos = async (_id, data) => {
+    const message = await Message.findById(_id);
     const emoticons = message.emoticons;
-    let updatedEmoticons;
-    if (emoticons.some(emoticon => emoticon.creator == createEmoticonDto.creator && emoticon.code == createEmoticonDto.code)) {
-        updatedEmoticons = emoticons.filter((emoticon) => !(emoticon.creator == createEmoticonDto.creator && emoticon.code == createEmoticonDto.code));
+    let updatedEmos = [];
+    console.log(data, emoticons);
+
+    if (emoticons.find(emo => String(emo.sender) === String(data.sender) && String(emo.code) === String(data.code))) {
+        console.log("here");
+
+        updatedEmos = emoticons.filter((emo) => !(String(emo.sender) === String(data.sender) && String(emo.code) === String(data.code)));
     } else {
-        updatedEmoticons = [...emoticons, createEmoticonDto];
+        updatedEmos = [...emoticons, data]
     }
-    await Message.findByIdAndUpdate(id, {
-        emoticons: updatedEmoticons,
+    await Message.findByIdAndUpdate(_id, {
+        emoticons: updatedEmos,
     });
-    return this.readOne(id);
+    return await Message.findById(_id).populate("sender");
 }
 
 exports.readByChannelID = async (channelID) => {

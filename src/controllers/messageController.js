@@ -49,14 +49,15 @@ exports.delete = async (socket, data) => {
     }
 }
 
-exports.emoticon = async (socket, data) => {
+exports.handleEmos = async (socket, data) => {
     try {
-        const message = await messageService.emoticon(data.messageId, { creator: socket.user.id, code: data.emoticonId });
-        const channel = await channelService.readOne(message.channel);
-        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.UPDATE}`, STATUS.ON, message);
-        socket.emit(TYPES.EMOTICON, STATUS.SUCCESS, data);
+        const { messageID, code } = data;
+        const message = await messageService.handleEmos(messageID, { sender: socket.user._id, code });
+        const channel = await channelService.read(message.channelID);
+        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.UPDATE}`, true, message);
     } catch (err) {
-        socket.emit(TYPES.EMOTICON, STATUS.FAILED, { ...data, message: err.message });
+        console.log(err);
+        socket.emit(TYPES.EMOTICON, false, { message: err.message });
     }
 }
 

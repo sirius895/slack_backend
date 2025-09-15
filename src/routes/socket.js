@@ -57,7 +57,8 @@ const onConnect = (socket) => {
         socket.on(`${TYPES.MESSAGE}_${METHODS.UPDATE}`, (data) => authMdr(socket, data, messageCtr.update));
         socket.on(`${TYPES.MESSAGE}_${METHODS.DELETE}`, (data) => authMdr(socket, data, messageCtr.delete));
         socket.on(`${TYPES.MESSAGE}_${METHODS.READ_BY_CHANNEL_ID}`, (data) => authMdr(socket, data, messageCtr.readByChannelID));
-        socket.on(TYPES.EMOTICON, (data) => authMdr(socket, data, messageCtr.emoticon));
+        socket.on(`${TYPES.MESSAGE}_${METHODS.HANDLE_EMOS}`, (data) => authMdr(socket, data, messageCtr.handleEmos));
+        // socket.on(TYPES.EMOTICON, (data) => authMdr(socket, data, messageCtr.emoticon));
         socket.on(TYPES.TYPING, (data) => authMdr(socket, data, messageCtr.typing));
     } catch (error) {
 
