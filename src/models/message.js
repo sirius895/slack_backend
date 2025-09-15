@@ -39,7 +39,7 @@ const messageSchema = mongoose.Schema(
                 }
             }
         ],
-        pinndBy: [
+        pinnedBy: [
             {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "users",
