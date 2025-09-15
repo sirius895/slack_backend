@@ -6,7 +6,6 @@ exports.create = async (socket, data) => {
     try {
         const channel = await channelService.create(data);
         console.log(channel);
-
         multiEmit(socket.socketList, channel.members, `${TYPES.CHANNEL}_${METHODS.CREATE}`, true, channel);
     } catch (err) {
         socket.emit(`${TYPES.CHANNEL}_${METHODS.CREATE}`, false, { message: "Create Failed" });
@@ -25,11 +24,13 @@ exports.read = async (socket, data) => {
 exports.update = async (socket, data) => {
     try {
         const { _id, ..._data } = data
-        console.log((await channelService.read(_id)).creator);
-        if (String((await channelService.read(_id)).creator) !== String(socket.user._id)) throw new Error('User has no permission to update this channel');
-        const channel = await channelService.update(_id, _data);
-        console.log(channel);
-        multiEmit(socket.socketList, channel.members, `${TYPES.CHANNEL}_${METHODS.UPDATE}`, true, channel);
+        const oldChannel = await channelService.read(_id)
+        const members = oldChannel.members
+        const channel = await channelService.update(socket.user._id, _id, _data);
+        channel.members.forEach(om => {
+            if (!members.includes(om)) members.push(om)
+        })
+        multiEmit(socket.socketList, members, `${TYPES.CHANNEL}_${METHODS.UPDATE}`, true, channel);
     } catch (err) {
         socket.emit(`${TYPES.CHANNEL}_${METHODS.UPDATE}`, false, { message: err.message });
     }

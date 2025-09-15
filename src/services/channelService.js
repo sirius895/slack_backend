@@ -14,9 +14,11 @@ exports.read = async (id) => {
     return channel;
 }
 
-exports.update = async (id, data) => {
-    await Channel.findByIdAndUpdate(id, data)
-    return await this.read(id)
+exports.update = async (userID, _id, data) => {
+    if (String((await this.read(_id)).creator) !== String(userID))
+        throw new Error('User has no permission to update this channel');
+    await Channel.findByIdAndUpdate(_id, data)
+    return await this.read(_id)
 }
 
 exports.delete = async (_id) => {
