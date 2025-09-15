@@ -5,8 +5,10 @@ const { STATUS, TYPES, METHODS } = require('../constants/chat');
 
 exports.create = async (socket, data) => {
     try {
+
         const message = await messageService.create(data);
         const channel = await channelService.read(message.channelID);
+        console.log(socket.socketList);
         multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.CREATE}`, true, message);
     } catch (err) {
         console.error(err);
