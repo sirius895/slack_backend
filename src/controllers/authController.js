@@ -5,6 +5,7 @@ const generateToken = require('../utils/generateToken');
 const { default: resState } = require("../constants/resState");
 const { tokenVerify } = require("../services/authService");
 const { TYPES, METHODS } = require('../constants/chat');
+const { multiEmit } = require("../utils/chat");
 require("dotenv").config();
 
 
@@ -108,11 +109,11 @@ exports.changeState = async (socket, data) => {
     try {
         await User.findByIdAndUpdate(socket.user._id, data);
         const user = await User.findById(socket.user._id)
-        console.log(user);
+        console.log(socket.userList);
 
         socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, true, user)
         // socket.emit(`broadcast`, true, user)
-        // multiEmit(socket.socketList, (await User.find({})).map(m => m._id), true, user)
+        multiEmit(socket.socketList, socket.userList, `${TYPES.AUTH}_${METHODS.BROADCAST}`, true, user)
     } catch (error) {
         console.log(error);
 

@@ -32,20 +32,21 @@ const removeAuth = (socket) => {
     }
 }
 
-const onConnect = (socket, io) => {
+const onConnect = (socket) => {
     try {
 
         console.log(`Socket ${socket.id} is connected`);
-        socket.socketList = socketList;
         socket.on(TYPES.AUTH, (token) => {
             console.log(`User login with token ${token}`);
             const user = authService.tokenVerify(token);
-
+            console.log(user);
+            
             if (user) {
                 if (!socketList[user._id]) socketList[user._id] = [];
                 if (!socketList[user._id].find(s => String(s.id) === String(socket.id))) socketList[user._id].push(socket);
                 if (!userList.find(u => String(u) === String(user._id))) userList.push(user._id)
                 socket.socketList = socketList
+                socket.userList = userList
             } else {
                 throw new Error("Unauthorized");
             }

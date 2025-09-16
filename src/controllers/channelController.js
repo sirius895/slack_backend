@@ -1,14 +1,37 @@
+const { model } = require('mongoose');
+
+const Channel = model('channels');
+
 const channelService = require('../services/channelService');
 const { multiEmit } = require('../utils/chat');
 const { STATUS, TYPES, METHODS } = require('../constants/chat');
 
+
 exports.create = async (socket, data) => {
     try {
+        console.log(data.members);
+        console.log(await Channel.find({
+            $or: [
+                { members: [data.members[0], data.members[1]] },
+                { members: [data.members[1], data.members[0]] }
+            ],
+            isChannel: false
+        }));
+
+
+        if (!data.isChannel) {
+            if (await (await Channel.find({
+                $or: [
+                    { members: [data.members[0], data.members[1]] },
+                    { members: [data.members[1], data.members[0]] }
+                ]
+                , isChannel: false
+            })).length) { throw new Error("Already exists!") }
+        }
         const channel = await channelService.create(data);
-        console.log(channel);
         multiEmit(socket.socketList, channel.members, `${TYPES.CHANNEL}_${METHODS.CREATE}`, true, channel);
     } catch (err) {
-        socket.emit(`${TYPES.CHANNEL}_${METHODS.CREATE}`, false, { message: "Create Failed" });
+        socket.emit(`${TYPES.CHANNEL}_${METHODS.CREATE}`, false, { message: err.message });
     }
 }
 
