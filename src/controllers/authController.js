@@ -26,7 +26,6 @@ exports.signUp = async (req, res) => {
                 status: resState.ERROR,
                 message: "Email already exists",
             });
-
         }
         const salt = await bcrypt.genSalt(10)
         const hash = await bcrypt.hash(password, salt);
@@ -50,13 +49,13 @@ exports.signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await User.findOne({ email });
-        if (!user) return res.status(200).json({
+        if (!user) return res.json({
             status: resState.ERROR,
             message: "User is not found!",
             payload: ""
         })
         const isMatched = await bcrypt.compare(password, user.password);
-        if (!isMatched) return res.status(200).json({
+        if (!isMatched) return res.json({
             status: resState.ERROR,
             message: "Password is not correct!",
             payload: "",
@@ -69,8 +68,6 @@ exports.signIn = async (req, res) => {
             payload: token
         })
     } catch (error) {
-        console.log(error);
-
         return res.status(500).json({
             status: resState.ERROR,
             message: "Server Error",
@@ -109,14 +106,9 @@ exports.changeState = async (socket, data) => {
     try {
         await User.findByIdAndUpdate(socket.user._id, data);
         const user = await User.findById(socket.user._id)
-        console.log(socket.userList);
-
         socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, true, user)
-        // socket.emit(`broadcast`, true, user)
         multiEmit(socket.socketList, socket.userList, `${TYPES.AUTH}_${METHODS.BROADCAST}`, true, user)
     } catch (error) {
-        console.log(error);
-
         socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, false, { message: error.message })
     }
 }

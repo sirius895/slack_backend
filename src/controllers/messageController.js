@@ -5,10 +5,8 @@ const { STATUS, TYPES, METHODS } = require('../constants/chat');
 
 exports.create = async (socket, data) => {
     try {
-
         const message = await messageService.create(data);
         const channel = await channelService.read(message.channelID);
-        console.log(socket.socketList);
         multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.CREATE}`, true, message);
     } catch (err) {
         console.error(err);
@@ -40,7 +38,7 @@ exports.delete = async (socket, data) => {
     try {
         const message = await messageService.delete(socket.user._id, data);
         const channel = await channelService.read(message.channelID);
-        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.DELETE}`, true, data);
+        multiEmit(socket.socketList, channel.members, `${TYPES.MESSAGE}_${METHODS.DELETE}`, true, message);
     } catch (err) {
         socket.emit(`${TYPES.MESSAGE}_${METHODS.DELETE}`, false, { message: err.message });
     }
