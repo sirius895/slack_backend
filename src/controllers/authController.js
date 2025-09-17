@@ -1,6 +1,5 @@
 const User = require("../models/user");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const generateToken = require("../utils/generateToken");
 const { default: resState } = require("../constants/resState");
 const { tokenVerify } = require("../services/authService");
@@ -10,9 +9,9 @@ require("dotenv").config();
 
 //signUp
 exports.signUp = async (req, res) => {
-  console.log(req.body);
+  console.log(req.body, req.file);
   try {
-    const { email, password, username, avatar } = req.body;
+    const { email, password, username } = req.body;
     if (!email || !password || !username) {
       return res.status(200).json({
         status: resState.WARNING,
@@ -32,7 +31,7 @@ exports.signUp = async (req, res) => {
       username,
       email,
       password: hash,
-      avatar,
+      avatar: req.file.filename,
     }).save();
     return res.json({
       status: resState.SUCCESS,
@@ -111,13 +110,7 @@ exports.changeState = async (socket, data) => {
     await User.findByIdAndUpdate(socket.user._id, data);
     const user = await User.findById(socket.user._id);
     socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, true, user);
-    multiEmit(
-      socket.socketList,
-      socket.userList,
-      `${TYPES.AUTH}_${METHODS.BROADCAST}`,
-      true,
-      user
-    );
+    multiEmit(socket.socketList, socket.userList, `${TYPES.AUTH}_${METHODS.BROADCAST}`, true, user);
   } catch (error) {
     socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, false, {
       message: error.message,

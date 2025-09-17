@@ -4,7 +4,7 @@ const Message = model("messages");
 
 exports.create = async (data) => {
   const message = new Message(data);
-  return await (await message.save()).populate("sender");
+  return await (await (await message.save()).populate("sender")).populate("files");
 };
 
 exports.read = async (data) => {
@@ -15,9 +15,7 @@ exports.read = async (data) => {
       messages.map((message) => message.id)
     );
     return messages.map((message) => {
-      const childCount = children.filter(
-        (child) => child.parent == message.id
-      ).length;
+      const childCount = children.filter((child) => child.parent == message.id).length;
       message.childCount = childCount;
       return message;
     });
@@ -37,14 +35,13 @@ exports.update = async (userId, _id, data) => {
   const message = await Message.findById(_id);
   if (!message) throw new Error("Not found message");
   await Message.findByIdAndUpdate(_id, data);
-  return await Message.findById(_id).populate("sender");
+  return await (await Message.findById(_id).populate("sender")).populate("files");
 };
 
 exports.delete = async (userId, id) => {
   const message = await Message.findById(id);
   if (!message) throw new Error("Not found message");
-  if (message.sender != userId)
-    throw new Error("User has no permission to update this message");
+  if (message.sender != userId) throw new Error("User has no permission to update this message");
   return Message.findByIdAndDelete(id);
 };
 
@@ -53,31 +50,19 @@ exports.handleEmos = async (_id, data) => {
   const message = await Message.findById(_id);
   const emoticons = message.emoticons;
   let updatedEmos = [];
-  if (
-    emoticons.find(
-      (emo) =>
-        String(emo.sender) === String(data.sender) &&
-        String(emo.code) === String(data.code)
-    )
-  ) {
-    updatedEmos = emoticons.filter(
-      (emo) =>
-        !(
-          String(emo.sender) === String(data.sender) &&
-          String(emo.code) === String(data.code)
-        )
-    );
+  if (emoticons.find((emo) => String(emo.sender) === String(data.sender) && String(emo.code) === String(data.code))) {
+    updatedEmos = emoticons.filter((emo) => !(String(emo.sender) === String(data.sender) && String(emo.code) === String(data.code)));
   } else {
     updatedEmos = [...emoticons, data];
   }
   await Message.findByIdAndUpdate(_id, {
     emoticons: updatedEmos,
   });
-  return await Message.findById(_id).populate("sender");
+  return await (await Message.findById(_id).populate("sender")).populate("files");
 };
 
 exports.readByChannelID = async (channelID) => {
-  return await Message.find({ channelID }).populate("sender");
+  return await Message.find({ channelID }).populate("sender").populate("files");
   // const children = await Message.find().in('parentID', messages.map(message => message._id));
   // return messages.map((message) => {
   //     const childCount = children.filter(child => String(child.parentID) === String(message._id)).length;
@@ -87,5 +72,5 @@ exports.readByChannelID = async (channelID) => {
 };
 
 exports.readByParentID = async (parentID) => {
-  return await Message.find({ parentID }).populate("sender");
+  return await (await Message.find({ parentID }).populate("sender")).populate("files");
 };

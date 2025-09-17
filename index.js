@@ -1,11 +1,11 @@
 const express = require("express");
-const bodyParser = require('body-parser')
+const bodyParser = require("body-parser");
 const http = require("http");
 const socketIO = require("socket.io");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const { GlobSync } = require('glob');
+const { GlobSync } = require("glob");
 
 dotenv.config();
 
@@ -17,9 +17,10 @@ app.use(bodyParser.json());
 
 app.use(cors());
 
-require('./src/models/channel');
-require('./src/models/user');
-require('./src/models/message');
+require("./src/models/channel");
+require("./src/models/user");
+require("./src/models/message");
+require("./src/models/files");
 
 require("./src/routes")(app);
 
@@ -28,10 +29,9 @@ const server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
     origin: "*",
-    methods: ['GET', 'POST'],
+    methods: ["GET", "POST"],
   },
 });
-
 
 const { onConnect: onSocketConnect } = require("./src/routes/socket");
 
@@ -44,10 +44,8 @@ server.listen(port, async () => {
   try {
     const host = process.env.DB_HOST;
     const db = process.env.DB_NAME;
-
     await mongoose.connect(`mongodb://${host}/${db}`);
-
-    console.log('MongoDB is connected');
+    console.log("MongoDB is connected");
   } catch (err) {
     console.error(err);
   }
