@@ -13,7 +13,9 @@ exports.fileUpload = async (req, res) => {
 
 exports.fileDownload = (req, res) => {
   try {
-    res.download(`/files/${req.params.filename}`, req.params.originalname);
+    console.log(req.params);
+
+    res.download(`public/files/${req.params.filename}`, req.params.originalname, () => {});
   } catch (error) {
     res.json({ message: "Download failed." });
   }
