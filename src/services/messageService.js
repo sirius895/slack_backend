@@ -72,5 +72,5 @@ exports.readByChannelID = async (channelID) => {
 };
 
 exports.readByParentID = async (parentID) => {
-  return await (await Message.find({ parentID }).populate("sender")).populate("files");
+  return await Message.find({ parentID }).populate("sender").populate("files");
 };

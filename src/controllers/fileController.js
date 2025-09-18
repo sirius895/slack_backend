@@ -1,22 +1,20 @@
 const { model } = require("mongoose");
 const File = model("files");
 
-// const File = require("../models/files")
-
 exports.fileUpload = async (req, res) => {
   try {
     const data = req.files.map((f) => ({ originalname: f.originalname, filename: f.filename }));
     const result = await File.insertMany(data);
     return res.status(201).json({ message: "File Upload Success", payload: result });
-  } catch (error) {}
+  } catch (error) {
+    return res.status(500).json({ message: "Server Eroor" });
+  }
 };
 
 exports.fileDownload = (req, res) => {
   try {
-    console.log(req.params);
-
-    res.download(`public/files/${req.params.filename}`, req.params.originalname, () => {});
+    res.download(`public/files/${req.params.filename}`, req.params.originalname);
   } catch (error) {
-    res.json({ message: "Download failed." });
+    res.status(500).json({ message: "Server Error." });
   }
 };

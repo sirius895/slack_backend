@@ -24,9 +24,9 @@ const removeAuth = (socket) => {
     try {
         console.log("disconnect");
         if (!socketList[socket?.user?._id]) return;
-        socketList[socket.user._id] = socketList[socket.user._id].filter(s => s.id !== socket.id)
+        socketList[socket.user?._id] = socketList[socket.user?._id].filter(s => s.id !== socket.id)
         socket.socketList = socketList
-        userList = userList.filter(u => u !== socket.user._id)
+        userList = userList.filter(u => u !== socket.user?._id)
     } catch (error) {
         console.log("removeErr", error);
     }
@@ -42,9 +42,9 @@ const onConnect = (socket) => {
             console.log(user);
             
             if (user) {
-                if (!socketList[user._id]) socketList[user._id] = [];
-                if (!socketList[user._id].find(s => String(s.id) === String(socket.id))) socketList[user._id].push(socket);
-                if (!userList.find(u => String(u) === String(user._id))) userList.push(user._id)
+                if (!socketList[user?._id]) socketList[user?._id] = [];
+                if (!socketList[user?._id].find(s => String(s.id) === String(socket.id))) socketList[user?._id].push(socket);
+                if (!userList.find(u => String(u) === String(user?._id))) userList.push(user?._id)
                 socket.socketList = socketList
                 socket.userList = userList
             } else {

@@ -40,7 +40,7 @@ exports.read = async (socket, data) => {
 exports.update = async (socket, data) => {
   try {
     const { _id, ..._data } = data;
-    const message = await messageService.update(socket.user._id, _id, _data);
+    const message = await messageService.update(socket.user?._id, _id, _data);
     const channel = await channelService.read(message.channelID);
     multiEmit(
       socket.socketList,
@@ -58,7 +58,7 @@ exports.update = async (socket, data) => {
 
 exports.delete = async (socket, data) => {
   try {
-    const message = await messageService.delete(socket.user._id, data);
+    const message = await messageService.delete(socket.user?._id, data);
     const channel = await channelService.read(message.channelID);
     multiEmit(
       socket.socketList,
@@ -78,7 +78,7 @@ exports.handleEmos = async (socket, data) => {
   try {
     const { messageID, code } = data;
     const message = await messageService.handleEmos(messageID, {
-      sender: socket.user._id,
+      sender: socket.user?._id,
       code,
     });
     const channel = await channelService.read(message.channelID);
@@ -101,10 +101,10 @@ exports.typing = async (socket, data) => {
     const channel = await channelService.read(channelID);
     multiEmit(
       socket.socketList,
-      channel.members.filter((m) => String(m) !== String(socket.user._id)),
+      channel.members.filter((m) => String(m) !== String(socket.user?._id)),
       TYPES.TYPING,
       true,
-      { messageID, user: socket.user._id }
+      { messageID, user: socket.user?._id }
     );
   } catch (err) {
     socket.emit(TYPES.TYPING, false, { message: err.message });

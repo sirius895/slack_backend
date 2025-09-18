@@ -65,7 +65,7 @@ exports.update = async (socket, data) => {
     const { _id, ..._data } = data;
     const oldChannel = await channelService.read(_id);
     const members = oldChannel.members;
-    const channel = await channelService.update(socket.user._id, _id, _data);
+    const channel = await channelService.update(socket.user?._id, _id, _data);
     channel.members.forEach((om) => {
       if (!members.includes(om)) members.push(om);
     });
@@ -88,7 +88,7 @@ exports.delete = async (socket, data) => {
     console.log(await channelService.read(data));
     if (
       String((await channelService.read(data)).creator) !==
-      String(socket.user._id)
+      String(socket.user?._id)
     )
       throw new Error("User has no permission to delete this channel");
     const channel = await channelService.delete(data);

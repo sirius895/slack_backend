@@ -90,7 +90,7 @@ exports.getUserByToken = async (req, res) => {
         payload: {},
       });
     }
-    const userInfo = await User.findById(user._id);
+    const userInfo = await User.findById(user?._id);
     return res.status(200).json({
       status: resState.SUCCESS,
       message: "Authorized",
@@ -107,8 +107,10 @@ exports.getUserByToken = async (req, res) => {
 
 exports.changeState = async (socket, data) => {
   try {
-    await User.findByIdAndUpdate(socket.user._id, data);
-    const user = await User.findById(socket.user._id);
+    console.log(data);
+
+    await User.findByIdAndUpdate(socket.user?._id, data);
+    const user = await User.findById(socket.user?._id);
     socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, true, user);
     multiEmit(socket.socketList, socket.userList, `${TYPES.AUTH}_${METHODS.BROADCAST}`, true, user);
   } catch (error) {
