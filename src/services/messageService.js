@@ -46,7 +46,6 @@ exports.delete = async (userId, id) => {
 };
 
 exports.handleEmos = async (_id, data) => {
-  console.log(_id, data);
   const message = await Message.findById(_id);
   const emoticons = message.emoticons;
   let updatedEmos = [];

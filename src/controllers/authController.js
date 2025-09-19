@@ -9,7 +9,6 @@ require("dotenv").config();
 
 //signUp
 exports.signUp = async (req, res) => {
-  console.log(req.body, req.file);
   try {
     const { email, password, username } = req.body;
     if (!email || !password || !username) {
@@ -31,7 +30,7 @@ exports.signUp = async (req, res) => {
       username,
       email,
       password: hash,
-      avatar: req.file.filename,
+      avatar: req.file ? req.file.filename : "default.gif",
     }).save();
     return res.json({
       status: resState.SUCCESS,
@@ -107,8 +106,6 @@ exports.getUserByToken = async (req, res) => {
 
 exports.changeState = async (socket, data) => {
   try {
-    console.log(data);
-
     await User.findByIdAndUpdate(socket.user?._id, data);
     const user = await User.findById(socket.user?._id);
     socket.emit(`${TYPES.AUTH}_${METHODS.UPDATE}`, true, user);
