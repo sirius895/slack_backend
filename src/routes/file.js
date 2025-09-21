@@ -1,6 +1,7 @@
 const multer = require("multer");
 const router = require("express").Router();
 const fileController = require("../controllers/fileController");
+const auth = require("../middlewares/auth");
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-router.post("/upload", upload.array("files"), fileController.fileUpload);
+router.post("/upload", upload.array("files"), auth, fileController.fileUpload);
 router.get("/download/:filename/:originalname", fileController.fileDownload);
 
 module.exports = router;

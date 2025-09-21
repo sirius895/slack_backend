@@ -11,10 +11,7 @@ exports.create = async (socket, data) => {
     console.log(data.members);
     console.log(
       await Channel.find({
-        $or: [
-          { members: [data.members[0], data.members[1]] },
-          { members: [data.members[1], data.members[0]] },
-        ],
+        $or: [{ members: [data.members[0], data.members[1]] }, { members: [data.members[1], data.members[0]] }],
         isChannel: false,
       })
     );
@@ -23,10 +20,7 @@ exports.create = async (socket, data) => {
       if (
         await (
           await Channel.find({
-            $or: [
-              { members: [data.members[0], data.members[1]] },
-              { members: [data.members[1], data.members[0]] },
-            ],
+            $or: [{ members: [data.members[0], data.members[1]] }, { members: [data.members[1], data.members[0]] }],
             isChannel: false,
           })
         ).length
@@ -35,13 +29,7 @@ exports.create = async (socket, data) => {
       }
     }
     const channel = await channelService.create(data);
-    multiEmit(
-      socket.socketList,
-      channel.members,
-      `${TYPES.CHANNEL}_${METHODS.CREATE}`,
-      true,
-      channel
-    );
+    multiEmit(socket.socketList, channel.members, `${TYPES.CHANNEL}_${METHODS.CREATE}`, true, channel);
   } catch (err) {
     socket.emit(`${TYPES.CHANNEL}_${METHODS.CREATE}`, false, {
       message: err.message,
@@ -69,13 +57,7 @@ exports.update = async (socket, data) => {
     channel.members.forEach((om) => {
       if (!members.includes(om)) members.push(om);
     });
-    multiEmit(
-      socket.socketList,
-      members,
-      `${TYPES.CHANNEL}_${METHODS.UPDATE}`,
-      true,
-      channel
-    );
+    multiEmit(socket.socketList, members, `${TYPES.CHANNEL}_${METHODS.UPDATE}`, true, channel);
   } catch (err) {
     socket.emit(`${TYPES.CHANNEL}_${METHODS.UPDATE}`, false, {
       message: err.message,
@@ -86,20 +68,10 @@ exports.update = async (socket, data) => {
 exports.delete = async (socket, data) => {
   try {
     console.log(await channelService.read(data));
-    if (
-      String((await channelService.read(data)).creator) !==
-      String(socket.user?._id)
-    )
-      throw new Error("User has no permission to delete this channel");
+    if (String((await channelService.read(data)).creator) !== String(socket.user?._id)) throw new Error("User has no permission to delete this channel");
     const channel = await channelService.delete(data);
     console.log(channel);
-    multiEmit(
-      socket.socketList,
-      channel.members,
-      `${TYPES.CHANNEL}_${METHODS.DELETE}`,
-      true,
-      channel
-    );
+    multiEmit(socket.socketList, channel.members, `${TYPES.CHANNEL}_${METHODS.DELETE}`, true, channel);
   } catch (err) {
     socket.emit(`${TYPES.CHANNEL}_${METHODS.DELETE}`, STATUS.FAILED, {
       message: err.message,
