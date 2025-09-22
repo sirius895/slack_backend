@@ -20,7 +20,7 @@ const messageSchema = mongoose.Schema(
     ],
     content: {
       type: String,
-      required: true,
+      // required: true,
     },
     files: [
       {

@@ -73,14 +73,14 @@ exports.handleEmos = async (socket, data) => {
 
 exports.typing = async (socket, data) => {
   try {
-    const { channelID, messageID } = data;
+    const { channelID, messageID, isForThread } = data;
     const channel = await channelService.read(channelID);
     multiEmit(
       socket.socketList,
       channel.members.filter((m) => String(m) !== String(socket.user?._id)),
       TYPES.TYPING,
       true,
-      { messageID, user: socket.user?._id }
+      { messageID, user: socket.user?._id, isForThread, channelID }
     );
   } catch (err) {
     socket.emit(TYPES.TYPING, false, { message: err.message });
